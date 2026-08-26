@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import requests
 from htbuilder.units import rem
 from htbuilder import div, styles
 from collections import namedtuple
@@ -30,6 +31,17 @@ def complete(model: str, prompt: str, session) -> str:
     return session.range(1).select(
         ai_complete(model=lit(model), prompt=lit(prompt)).alias("R")
     ).collect()[0]["R"]
+
+
+def ask_llm(question):
+    r = requests.post(
+        "http://127.0.0.1:8000/chat/",          # trailing slash matters
+        json={"question": question},
+        timeout=300,                             # LLM calls are slow
+    )
+    r.raise_for_status()
+    data = r.json()
+    return(data["response"]["message"]["content"])
 
 st.set_page_config(page_title="Streamlit AI assistant", page_icon="✨")
 
@@ -92,16 +104,14 @@ INSTRUCTIONS = textwrap.dedent("""
 """)
 
 SUGGESTIONS = {
-    ":blue[:material/local_library:] What is Streamlit?": (
-        "What is Streamlit, what is it great at, and what can I do with it?"
+    ":blue[:material/local_library:] What is 1+1?": (
+        "What is 1+1? Write the answer in english, french and german. Next, generate a random number between 0 and 10."
     ),
-    ":green[:material/database:] Help me understand session state": (
-        "Help me understand session state. What is it for? "
-        "What are gotchas? What are alternatives?"
+    ":green[:material/database:] Random number": (
+        "Generate a random number between 0 and 10, be very direct."
     ),
-    ":orange[:material/multiline_chart:] How do I make an interactive chart?": (
-        "How do I make a chart where, when I click, another chart updates? "
-        "Show me examples with Altair or Plotly."
+    ":orange[:material/multiline_chart:] Supersimple question?": (
+        "What is 1+1? Be very direct."
     ),
     ":violet[:material/apparel:] How do I customize my app?": (
         "How do I customize my app? What does Streamlit offer? No hacks please."
@@ -144,68 +154,6 @@ def build_prompt(**kwargs):
 
     return prompt_str
 
-
-# Just some little objects to make tasks more readable.
-TaskInfo = namedtuple("TaskInfo", ["name", "function", "args"])
-TaskResult = namedtuple("TaskResult", ["name", "result"])
-
-
-def build_question_prompt(question):
-    """Fetches info from different services and creates the prompt string."""
-    old_history = st.session_state.messages[:-HISTORY_LENGTH]
-    recent_history = st.session_state.messages[-HISTORY_LENGTH:]
-
-    if recent_history:
-        recent_history_str = history_to_text(recent_history)
-    else:
-        recent_history_str = None
-
-    # Fetch information from different services in parallel.
-    task_infos = []
-
-    if SUMMARIZE_OLD_HISTORY and old_history:
-        task_infos.append(
-            TaskInfo(
-                name="old_message_summary",
-                function=generate_chat_summary,
-                args=(old_history,),
-            )
-        )
-
-    if PAGES_CONTEXT_LEN:
-        task_infos.append(
-            TaskInfo(
-                name="documentation_pages",
-                function=search_relevant_pages,
-                args=(question,),
-            )
-        )
-
-    if DOCSTRINGS_CONTEXT_LEN:
-        task_infos.append(
-            TaskInfo(
-                name="command_docstrings",
-                function=search_relevant_docstrings,
-                args=(question,),
-            )
-        )
-
-    results = executor.map(
-        lambda task_info: TaskResult(
-            name=task_info.name,
-            result=task_info.function(*task_info.args),
-        ),
-        task_infos,
-    )
-
-    context = {name: result for name, result in results}
-
-    return build_prompt(
-        instructions=INSTRUCTIONS,
-        **context,
-        recent_messages=recent_history_str,
-        question=question,
-    )
 
 
 def generate_chat_summary(messages):
@@ -278,12 +226,6 @@ def get_response(prompt):
     )
 
 
-def send_telemetry(**kwargs):
-    """Records some telemetry about questions being asked."""
-    # TODO: Implement this.
-    pass
-
-
 def show_feedback_controls(message_index):
     """Shows the "How did I do?" control."""
     st.write("")
@@ -341,7 +283,7 @@ title_row = st.container(
 with title_row:
     st.title(
         # ":material/cognition_2: Streamlit AI assistant", anchor=False, width="stretch"
-        "Streamlit AI assistant",
+        "Lets compare a vanilla LLM with a RAG powered one... about stuff",
         anchor=False,
         width="stretch",
     )
@@ -359,12 +301,13 @@ user_first_interaction = (
 )
 
 has_message_history = (
-    "messages" in st.session_state and len(st.session_state.messages) > 0
+    "messages" in st.session_state and len(st.session_state.messages_van) > 0 and len(st.session_state.messages_rag) > 0 
 )
 
 # Show a different UI when the user hasn't asked a question yet.
 if not user_first_interaction and not has_message_history:
-    st.session_state.messages = []
+    st.session_state.messages_van = []
+    st.session_state.messages_rag = []
 
     with st.container():
         st.chat_input("Ask a question...", key="initial_question")
@@ -384,90 +327,142 @@ if not user_first_interaction and not has_message_history:
 
     st.stop()
 
-# Show chat input at the bottom when a question has been asked.
-user_message = st.chat_input("Ask a follow-up...")
 
-if not user_message:
-    if user_just_asked_initial_question:
-        user_message = st.session_state.initial_question
-    if user_just_clicked_suggestion:
-        user_message = SUGGESTIONS[st.session_state.selected_suggestion]
-
-with title_row:
-
-    def clear_conversation():
-        st.session_state.messages = []
-        st.session_state.initial_question = None
-        st.session_state.selected_suggestion = None
-
-    st.button(
-        "Restart",
-        icon=":material/refresh:",
-        on_click=clear_conversation,
-    )
+col1, col2 = st.columns(2)
 
 if "prev_question_timestamp" not in st.session_state:
     st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
 
-# Display chat messages from history as speech bubbles.
-for i, message in enumerate(st.session_state.messages):
-    with st.chat_message(message["role"]):
-        if message["role"] == "assistant":
-            st.container()  # Fix ghost message bug.
+with col1:
+    st.header("Vanilla model")
+    user_message_van = st.chat_input("Ask a follow-up...", key="user_followup_v")
 
-        st.markdown(message["content"])
+    if not user_message_van:
+        if user_just_asked_initial_question:
+            user_message_van = st.session_state.initial_question
+        if user_just_clicked_suggestion:
+            user_message_van = SUGGESTIONS[st.session_state.selected_suggestion]
 
-        if message["role"] == "assistant":
-            show_feedback_controls(i)
+    if user_message_van:
+        # When the user posts a message...
 
-if user_message:
-    # When the user posts a message...
+        # Streamlit's Markdown engine interprets "$" as LaTeX code (used to
+        # display math). The line below fixes it.
+        user_message_van = user_message_van.replace("$", r"\$")
 
-    # Streamlit's Markdown engine interprets "$" as LaTeX code (used to
-    # display math). The line below fixes it.
-    user_message = user_message.replace("$", r"\$")
+        # Display message as a speech bubble.
+        with st.chat_message("user"):
+            st.text(user_message_van)
 
-    # Display message as a speech bubble.
-    with st.chat_message("user"):
-        st.text(user_message)
+        # Display assistant response as a speech bubble.
+        with st.chat_message("assistant"):
+            with st.spinner("Waiting..."):
+                # Rate-limit the input if needed.
+                question_timestamp = datetime.datetime.now()
+                time_diff = question_timestamp - st.session_state.prev_question_timestamp
+                st.session_state.prev_question_timestamp = question_timestamp
 
-    # Display assistant response as a speech bubble.
-    with st.chat_message("assistant"):
-        with st.spinner("Waiting..."):
-            # Rate-limit the input if needed.
-            question_timestamp = datetime.datetime.now()
-            time_diff = question_timestamp - st.session_state.prev_question_timestamp
-            st.session_state.prev_question_timestamp = question_timestamp
+                if time_diff < MIN_TIME_BETWEEN_REQUESTS:
+                    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
 
-            if time_diff < MIN_TIME_BETWEEN_REQUESTS:
-                time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
+                user_message_van = user_message_van.replace("'", "")
 
-            user_message = user_message.replace("'", "")
+            # Send prompt to LLM.
+            with st.spinner("Thinking..."):
+                #response_gen = get_response(full_prompt)
+                response_gen = [ask_llm(user_message_van)]
 
-        # Build a detailed prompt.
-        if DEBUG_MODE:
-            with st.status("Computing prompt...") as status:
-                full_prompt = build_question_prompt(user_message)
-                st.code(full_prompt)
-                status.update(label="Prompt computed")
-        else:
-            with st.spinner("Researching..."):
-                full_prompt = build_question_prompt(user_message)
+            # Put everything after the spinners in a container to fix the
+            # ghost message bug.
+            with st.container():
+                # Stream the LLM response.
+                response = st.write_stream(response_gen)
 
-        # Send prompt to LLM.
-        with st.spinner("Thinking..."):
-            response_gen = get_response(full_prompt)
+                col1.write_stream(response_gen)
 
-        # Put everything after the spinners in a container to fix the
-        # ghost message bug.
-        with st.container():
-            # Stream the LLM response.
-            response = st.write_stream(response_gen)
+                # Add messages to chat history.
+                st.session_state.messages.append({"role": "user", "content": user_message_van})
+                st.session_state.messages.append({"role": "assistant", "content": response})
 
-            # Add messages to chat history.
-            st.session_state.messages.append({"role": "user", "content": user_message})
-            st.session_state.messages.append({"role": "assistant", "content": response})
 
-            # Other stuff.
-            show_feedback_controls(len(st.session_state.messages) - 1)
-            send_telemetry(question=user_message, response=response)
+with col2:
+    st.header("RAG powered model")
+    user_message_rag = col2.chat_input("Ask a follow-up...", key="user_followup_rag")
+    if not user_message_rag:
+        if user_just_asked_initial_question:
+            user_message_rag = st.session_state.initial_question
+        if user_just_clicked_suggestion:
+            user_message_rag = SUGGESTIONS[st.session_state.selected_suggestion]
+
+    if user_message_rag:
+        # When the user posts a message...
+
+        # Streamlit's Markdown engine interprets "$" as LaTeX code (used to
+        # display math). The line below fixes it.
+        user_message_rag = user_message_rag.replace("$", r"\$")
+
+        # Display message as a speech bubble.
+        with st.chat_message("user"):
+            st.text(user_message_rag)
+
+        # Display assistant response as a speech bubble.
+        with st.chat_message("assistant"):
+            with st.spinner("Waiting..."):
+                # Rate-limit the input if needed.
+                question_timestamp = datetime.datetime.now()
+                time_diff = question_timestamp - st.session_state.prev_question_timestamp
+                st.session_state.prev_question_timestamp = question_timestamp
+
+                if time_diff < MIN_TIME_BETWEEN_REQUESTS:
+                    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
+
+                user_message_rag = user_message_rag.replace("'", "")
+
+            # Send prompt to LLM.
+            with st.spinner("Thinking..."):
+                #response_gen = get_response(full_prompt)
+                response_gen = [ask_llm(user_message_rag)]
+
+            # Put everything after the spinners in a container to fix the
+            # ghost message bug.
+            with st.container():
+                # Stream the LLM response.
+                response = st.write_stream(response_gen)
+
+                col1.write_stream(response_gen)
+
+                # Add messages to chat history.
+                st.session_state.messages_rag.append({"role": "user", "content": user_message_rag})
+                st.session_state.messages_rag.append({"role": "assistant", "content": response})
+
+    
+
+    if "prev_question_timestamp" not in st.session_state:
+        st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
+
+    # Display chat messages from history as speech bubbles.
+    for i, message in enumerate(st.session_state.messages):
+        with st.chat_message(message["role"]):
+            if message["role"] == "assistant":
+                st.container()  # Fix ghost message bug.
+
+            st.markdown(message["content"])
+
+# Clear the chat
+with title_row:
+
+        def clear_conversation():
+            st.session_state.messages_rag = []
+            st.session_state.initial_question = None
+            st.session_state.selected_suggestion = None
+
+        st.button(
+            "Restart",
+            icon=":material/refresh:",
+            on_click=clear_conversation,
+        )
+
+
+
+
+

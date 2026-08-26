@@ -1,7 +1,6 @@
 import fastapi
 import os
 import signal
-import asyncio
 from ollama import Client, AsyncClient
 from pydantic import BaseModel
 class Query(BaseModel):
