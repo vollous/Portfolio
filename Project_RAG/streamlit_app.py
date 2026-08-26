@@ -222,13 +222,11 @@ for chat, col in zip(st.session_state.chats , cols):
                 with st.spinner("Thinking..."):
                     response_gen = [chat.chat(user_message)]
 
-                # Put everything after the spinners in a container to fix the
-                # ghost message bug.
-                with st.container():
-                    # Stream the LLM response.
-                    response = st.write_stream(response_gen)
-
-                    st.write_stream(response_gen)
+                    # Put everything after the spinners in a container to fix the
+                    # ghost message bug.
+                    with st.container():
+                        # Stream the LLM response.
+                        response = st.write_stream(response_gen)
 
 
 # Clear the chat
