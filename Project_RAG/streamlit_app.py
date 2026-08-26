@@ -177,16 +177,15 @@ if "prev_question_timestamp" not in st.session_state:
 
 for chat, col in zip(chats, cols):
     with col:
-
-
-
         st.header(chat.name)
-        user_message = col.chat_input("Ask a follow-up...", key="user_followup" + chat.name)
+        user_message = st.chat_input("Ask a follow-up...", key="user_followup" + chat.name)
         if not user_message:
             if user_just_asked_initial_question:
                 user_message = st.session_state.initial_question
             if user_just_clicked_suggestion:
                 user_message = SUGGESTIONS[st.session_state.selected_suggestion]
+
+
 
         if user_message:
             # When the user posts a message...
@@ -222,7 +221,7 @@ for chat, col in zip(chats, cols):
                     # Stream the LLM response.
                     response = st.write_stream(response_gen)
 
-                    col.write_stream(response_gen)
+                    st.write_stream(response_gen)
 
 
         
