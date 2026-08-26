@@ -46,6 +46,9 @@ class Chat:
     def clear_chat(self):
         self.history.clear()
 
+if 'chats' not in st.session_state:
+    st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powerd chat", True)]
+
 st.set_page_config(page_title="Streamlit AI assistant", page_icon="✨")
 
 MIN_TIME_BETWEEN_REQUESTS = datetime.timedelta(seconds=3)
@@ -146,8 +149,6 @@ has_message_history = (
 
 # Show a different UI when the user hasn't asked a question yet.
 if not user_first_interaction and not has_message_history:
-    st.session_state.messages_van = []
-    st.session_state.messages_rag = []
 
     with st.container():
         st.chat_input("Ask a question...", key="initial_question")
@@ -167,17 +168,22 @@ if not user_first_interaction and not has_message_history:
 
     st.stop()
 
-chats = [Chat("Vanilla chat", False), Chat("RAG powerd chat", True)]
-
-
-cols = st.columns(2)
 
 if "prev_question_timestamp" not in st.session_state:
     st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
 
-for chat, col in zip(chats, cols):
+cols = st.columns(2)
+for chat, col in zip(st.session_state.chats , cols):
     with col:
         st.header(chat.name)
+
+        # Display chat messages from history as speech bubbles.
+        for i, message in enumerate(chat.history):
+            with st.chat_message(message["role"]):
+                if message["role"] == "assistant":
+                    st.container()  # Fix ghost message bug.
+                st.markdown(message["content"])
+
         user_message = st.chat_input("Ask a follow-up...", key="user_followup" + chat.name)
         if not user_message:
             if user_just_asked_initial_question:
@@ -224,27 +230,12 @@ for chat, col in zip(chats, cols):
                     st.write_stream(response_gen)
 
 
-        
-
-        if "prev_question_timestamp" not in st.session_state:
-            st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
-
-        # Display chat messages from history as speech bubbles.
-        #for i, message in enumerate(st.session_state.messages):
-        #    with st.chat_message(message["role"]):
-        #        if message["role"] == "assistant":
-        #            st.container()  # Fix ghost message bug.
-
-        #        st.markdown(message["content"])
-
 # Clear the chat
 with title_row:
-
         def clear_conversation():
             st.session_state.messages_rag = []
             st.session_state.initial_question = None
             st.session_state.selected_suggestion = None
-
         st.button(
             "Restart",
             icon=":material/refresh:",
