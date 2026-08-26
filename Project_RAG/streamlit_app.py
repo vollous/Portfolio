@@ -144,7 +144,7 @@ user_first_interaction = (
 )
 
 has_message_history = (
-    "messages" in st.session_state and len(st.session_state.messages_van) > 0 and len(st.session_state.messages_rag) > 0 
+    len(st.session_state["chats"][0].history) > 0 and len(st.session_state["chats"][1].history) > 0
 )
 
 # Show a different UI when the user hasn't asked a question yet.
