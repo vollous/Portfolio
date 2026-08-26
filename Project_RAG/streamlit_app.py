@@ -169,13 +169,15 @@ if not user_first_interaction and not has_message_history:
     st.stop()
 
 
-if "prev_question_timestamp" not in st.session_state:
-    st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
-
 cols = st.columns(2)
 for chat, col in zip(st.session_state.chats , cols):
     with col:
         st.header(chat.name)
+
+
+        if "prev_question_timestamp" not in st.session_state:
+            st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
+
 
         # Display chat messages from history as speech bubbles.
         for i, message in enumerate(chat.history):
@@ -185,13 +187,12 @@ for chat, col in zip(st.session_state.chats , cols):
                 st.markdown(message["content"])
 
         user_message = st.chat_input("Ask a follow-up...", key="user_followup" + chat.name)
+
         if not user_message:
             if user_just_asked_initial_question:
                 user_message = st.session_state.initial_question
             if user_just_clicked_suggestion:
                 user_message = SUGGESTIONS[st.session_state.selected_suggestion]
-
-
 
         if user_message:
             # When the user posts a message...
@@ -204,30 +205,30 @@ for chat, col in zip(st.session_state.chats , cols):
             with st.chat_message("user"):
                 st.text(user_message)
 
-            # Display assistant response as a speech bubble.
-            with st.chat_message("assistant"):
-                with st.spinner("Waiting..."):
-                    # Rate-limit the input if needed.
-                    question_timestamp = datetime.datetime.now()
-                    time_diff = question_timestamp - st.session_state.prev_question_timestamp
-                    st.session_state.prev_question_timestamp = question_timestamp
+        # Display assistant response as a speech bubble.
+        with st.chat_message("assistant"):
+            with st.spinner("Waiting..."):
+                # Rate-limit the input if needed.
+                question_timestamp = datetime.datetime.now()
+                time_diff = question_timestamp - st.session_state.prev_question_timestamp
+                st.session_state.prev_question_timestamp = question_timestamp
 
-                    if time_diff < MIN_TIME_BETWEEN_REQUESTS:
-                        time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
+                if time_diff < MIN_TIME_BETWEEN_REQUESTS:
+                    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
 
-                    user_message = user_message.replace("'", "")
+                user_message = user_message.replace("'", "")
 
-                # Send prompt to LLM.
-                with st.spinner("Thinking..."):
-                    response_gen = [chat.chat(user_message)]
+            # Send prompt to LLM.
+            with st.spinner("Thinking..."):
+                response_gen = [chat.chat(user_message)]
 
-                # Put everything after the spinners in a container to fix the
-                # ghost message bug.
-                with st.container():
-                    # Stream the LLM response.
-                    response = st.write_stream(response_gen)
+            # Put everything after the spinners in a container to fix the
+            # ghost message bug.
+            with st.container():
+                # Stream the LLM response.
+                response = st.write_stream(response_gen)
 
-                    st.write_stream(response_gen)
+                st.write_stream(response_gen)
 
 
 # Clear the chat
