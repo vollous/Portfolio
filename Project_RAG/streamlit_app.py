@@ -232,7 +232,8 @@ for chat, col in zip(st.session_state.chats , cols):
 # Clear the chat
 with title_row:
         def clear_conversation():
-            st.session_state.messages_rag = []
+            for chat in st.session_state['chats']:
+                chat.clear_chat() 
             st.session_state.initial_question = None
             st.session_state.selected_suggestion = None
         st.button(
