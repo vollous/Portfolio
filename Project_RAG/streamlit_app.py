@@ -205,30 +205,30 @@ for chat, col in zip(st.session_state.chats , cols):
             with st.chat_message("user"):
                 st.text(user_message)
 
-        # Display assistant response as a speech bubble.
-        with st.chat_message("assistant"):
-            with st.spinner("Waiting..."):
-                # Rate-limit the input if needed.
-                question_timestamp = datetime.datetime.now()
-                time_diff = question_timestamp - st.session_state.prev_question_timestamp
-                st.session_state.prev_question_timestamp = question_timestamp
+            # Display assistant response as a speech bubble.
+            with st.chat_message("assistant"):
+                with st.spinner("Waiting..."):
+                    # Rate-limit the input if needed.
+                    question_timestamp = datetime.datetime.now()
+                    time_diff = question_timestamp - st.session_state.prev_question_timestamp
+                    st.session_state.prev_question_timestamp = question_timestamp
 
-                if time_diff < MIN_TIME_BETWEEN_REQUESTS:
-                    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
+                    #if time_diff < MIN_TIME_BETWEEN_REQUESTS:
+                    #    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
 
-                user_message = user_message.replace("'", "")
+                    user_message = user_message.replace("'", "")
 
-            # Send prompt to LLM.
-            with st.spinner("Thinking..."):
-                response_gen = [chat.chat(user_message)]
+                # Send prompt to LLM.
+                with st.spinner("Thinking..."):
+                    response_gen = [chat.chat(user_message)]
 
-            # Put everything after the spinners in a container to fix the
-            # ghost message bug.
-            with st.container():
-                # Stream the LLM response.
-                response = st.write_stream(response_gen)
+                # Put everything after the spinners in a container to fix the
+                # ghost message bug.
+                with st.container():
+                    # Stream the LLM response.
+                    response = st.write_stream(response_gen)
 
-                st.write_stream(response_gen)
+                    st.write_stream(response_gen)
 
 
 # Clear the chat
