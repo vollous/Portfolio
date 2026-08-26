@@ -22,10 +22,6 @@ import textwrap
 import time
 
 import streamlit as st
-from snowflake.core import Root
-#from snowflake.cortex import complete
-
-from snowflake.snowpark.functions import ai_complete, lit
 
 def complete(model: str, prompt: str, session) -> str:
     return session.range(1).select(
@@ -45,41 +41,7 @@ def ask_llm(question):
 
 st.set_page_config(page_title="Streamlit AI assistant", page_icon="✨")
 
-# -----------------------------------------------------------------------------
-# Set things up.
-
-
-@st.cache_resource(ttl="5m")
-def get_session():
-    return st.connection("snowflake").session()
-
-
-#root = Root(get_session())
-executor = ThreadPoolExecutor(max_workers=5)
-
-MODEL = "claude-4-sonnet"
-
-DB = "ST_ASSISTANT"
-SCHEMA = "PUBLIC"
-DOCSTRINGS_SEARCH_SERVICE = "STREAMLIT_DOCSTRINGS_SEARCH_SERVICE"
-PAGES_SEARCH_SERVICE = "STREAMLIT_DOCS_PAGES_SEARCH_SERVICE"
-HISTORY_LENGTH = 5
-SUMMARIZE_OLD_HISTORY = True
-DOCSTRINGS_CONTEXT_LEN = 10
-PAGES_CONTEXT_LEN = 10
 MIN_TIME_BETWEEN_REQUESTS = datetime.timedelta(seconds=3)
-
-CORTEX_URL = (
-    "https://docs.snowflake.com/en/guides-overview-ai-features"
-    "?utm_source=streamlit"
-    "&utm_medium=referral"
-    "&utm_campaign=streamlit-demo-apps"
-    "&utm_content=streamlit-assistant"
-)
-
-GITHUB_URL = "https://github.com/streamlit/streamlit-assistant"
-
-DEBUG_MODE = st.query_params.get("debug", "false").lower() == "true"
 
 INSTRUCTIONS = textwrap.dedent("""
     - You are a helpful AI chat assistant focused on answering quesions about
@@ -122,132 +84,10 @@ SUGGESTIONS = {
 }
 
 
-def build_prompt(**kwargs):
-    """Builds a prompt string with the kwargs as HTML-like tags.
-
-    For example, this:
-
-        build_prompt(foo="1\n2\n3", bar="4\n5\n6")
-
-    ...returns:
-
-        '''
-        <foo>
-        1
-        2
-        3
-        </foo>
-        <bar>
-        4
-        5
-        6
-        </bar>
-        '''
-    """
-    prompt = []
-
-    for name, contents in kwargs.items():
-        if contents:
-            prompt.append(f"<{name}>\n{contents}\n</{name}>")
-
-    prompt_str = "\n".join(prompt)
-
-    return prompt_str
 
 
 
-def generate_chat_summary(messages):
-    """Summarizes the chat history in `messages`."""
-    prompt = build_prompt(
-        instructions="Summarize this conversation as concisely as possible.",
-        conversation=history_to_text(messages),
-    )
 
-    return complete(MODEL, prompt, session=get_session())
-
-
-def history_to_text(chat_history):
-    """Converts chat history into a string."""
-    return "\n".join(f"[{h['role']}]: {h['content']}" for h in chat_history)
-
-
-def search_relevant_pages(query):
-    """Searches the markdown contents of Streamlit's documentation."""
-    cortex_search_service = (
-        root.databases[DB].schemas[SCHEMA].cortex_search_services[PAGES_SEARCH_SERVICE]
-    )
-
-    context_documents = cortex_search_service.search(
-        query,
-        columns=["PAGE_URL", "PAGE_CHUNK"],
-        filter={},
-        limit=PAGES_CONTEXT_LEN,
-    )
-
-    results = context_documents.results
-
-    context = [f"[{row['PAGE_URL']}]: {row['PAGE_CHUNK']}" for row in results]
-    context_str = "\n".join(context)
-
-    return context_str
-
-
-def search_relevant_docstrings(query):
-    """Searches the docstrings of Streamlit's commands."""
-    cortex_search_service = (
-        root.databases[DB]
-        .schemas[SCHEMA]
-        .cortex_search_services[DOCSTRINGS_SEARCH_SERVICE]
-    )
-
-    context_documents = cortex_search_service.search(
-        query,
-        columns=["STREAMLIT_VERSION", "COMMAND_NAME", "DOCSTRING_CHUNK"],
-        filter={"@eq": {"STREAMLIT_VERSION": "latest"}},
-        limit=DOCSTRINGS_CONTEXT_LEN,
-    )
-
-    results = context_documents.results
-
-    context = [
-        f"[Document {i}]: {row['DOCSTRING_CHUNK']}" for i, row in enumerate(results)
-    ]
-    context_str = "\n".join(context)
-
-    return context_str
-
-
-def get_response(prompt):
-    return complete(
-        MODEL,
-        prompt,
-        stream=True,
-        session=get_session(),
-    )
-
-
-def show_feedback_controls(message_index):
-    """Shows the "How did I do?" control."""
-    st.write("")
-
-    with st.popover("How did I do?"):
-        with st.form(key=f"feedback-{message_index}", border=False):
-            with st.container(gap=None):
-                st.markdown(":small[Rating]")
-                rating = st.feedback(options="stars")
-
-            details = st.text_area("More information (optional)")
-
-            if st.checkbox("Include chat history with my feedback", True):
-                relevant_history = st.session_state.messages[:message_index]
-            else:
-                relevant_history = []
-
-            ""  # Add some space
-
-            if st.form_submit_button("Send feedback"):
-                # TODO: Submit feedback here!
-                pass
 
 
 @st.dialog("Legal disclaimer")
@@ -369,7 +209,6 @@ with col1:
 
             # Send prompt to LLM.
             with st.spinner("Thinking..."):
-                #response_gen = get_response(full_prompt)
                 response_gen = [ask_llm(user_message_van)]
 
             # Put everything after the spinners in a container to fix the
@@ -420,7 +259,6 @@ with col2:
 
             # Send prompt to LLM.
             with st.spinner("Thinking..."):
-                #response_gen = get_response(full_prompt)
                 response_gen = [ask_llm(user_message_rag)]
 
             # Put everything after the spinners in a container to fix the
