@@ -12,39 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import requests
 from htbuilder.units import rem
 from htbuilder import div, styles
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
+from chat import Chat
 import datetime
 import textwrap
 import time
+from threading import Thread
 
 import streamlit as st
 
-class Chat:
-    def __init__(self, name:str, rag:bool):
-        self.name = name
-        self.rag = rag
-        self.history = []
 
-    def chat(self, message):
-        self.history.append({"role": "user", "content": message})
-        r = requests.post(
-                "http://127.0.0.1:8000/chat/",          # trailing slash matters
-                json={"question": message},
-                timeout=300,                             # LLM calls are slow
-            )
-        
-        r.raise_for_status()
-        data = r.json()
-        response = data["response"]["message"]["content"]
-        self.history.append({"role": "assistant", "content": response})
-        return(response)
-
-    def clear_chat(self):
-        self.history.clear()
 
 if 'chats' not in st.session_state:
     st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powerd chat", True)]
@@ -172,8 +152,6 @@ if not user_first_interaction and not has_message_history:
 def render_chat_column(chat, col):
     with col:
             st.header(chat.name)
-    
-    
             if "prev_question_timestamp" not in st.session_state:
                 st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
     
