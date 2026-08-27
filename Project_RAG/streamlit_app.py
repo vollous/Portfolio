@@ -166,7 +166,7 @@ def render_chat_column(chat, col):
                         st.container()  # Fix ghost message bug.
                     st.markdown(message["content"])
 
-        user_message = st.chat_input("Ask a follow-up...", key="user_followup" + chat.name)
+        user_message = st.chat_input("Ask a follow-up...", key="user_followup_" + chat.name)
 
         with message_container:
             if not user_message:
@@ -214,14 +214,16 @@ def render_chat_column(chat, col):
 
 
 cols = st.columns(2)
+
+threads = []
 for chat, col in zip(st.session_state.chats , cols):
-    x = Thread(target=render_chat_column, args=(chat, col))
-    add_script_run_ctx(x, get_script_run_ctx())
-    x.start()
+    thread = Thread(target=render_chat_column, args=(chat, col))
+    add_script_run_ctx(thread, get_script_run_ctx())
+    thread.start()
+    threads.append(thread)
 
-x.join()
-    
-
+for thread in threads:      # join ALL of them, not just the last
+    thread.join()
 
 # Clear the chat
 with title_row:
