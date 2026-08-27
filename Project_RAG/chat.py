@@ -7,6 +7,7 @@ class Chat:
         self.history = []
 
     def chat(self, message):
+        print("Entering chat API call")
         self.history.append({"role": "user", "content": message})
         self.history.append({"role": "assistant", "content": 2})
         return "2"
@@ -20,6 +21,7 @@ class Chat:
         data = r.json()
         response = data["response"]["message"]["content"]
         self.history.append({"role": "assistant", "content": response})
+        print(response)
         return(response)
 
     def clear_chat(self):
