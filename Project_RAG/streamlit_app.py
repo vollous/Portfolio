@@ -197,7 +197,7 @@ def render_chat_column(chat, col):
                         #if time_diff < MIN_TIME_BETWEEN_REQUESTS:
                         
                         #    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
-                        time.sleep(5)
+                        time.sleep(2)
                         user_message = user_message.replace("'", "")
 
                     # Send prompt to LLM.
@@ -206,7 +206,7 @@ def render_chat_column(chat, col):
 
                     # Put everything after the spinners in a container to fix the
                     # ghost message bug.
-                    with st.container():
+                    with st.empty():
                         # Stream the LLM response.
                         st.write_stream(response_gen)
 
