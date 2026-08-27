@@ -7,11 +7,12 @@ class Query(BaseModel):
     question: str
 
 app = fastapi.FastAPI()
+client = AsyncClient()
 
 @app.post("/chat/")
 async def chat(query: Query):
   message = {'role': 'user', 'content': query.question}
-  response = Client().chat(model='qwen3:4b', messages=[message])
+  response = await client.chat(model='qwen3:4b', messages=[message])
   return {"response": response}
 
 @app.post("/shutdown")
