@@ -219,7 +219,7 @@ for chat, col in zip(st.session_state.chats , cols):
                         #if time_diff < MIN_TIME_BETWEEN_REQUESTS:
                         
                         #    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
-                        time.sleep(1)
+                        time.sleep(2)
                         user_message = user_message.replace("'", "")
 
                     # Send prompt to LLM.
