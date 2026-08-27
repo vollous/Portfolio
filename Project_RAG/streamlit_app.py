@@ -25,7 +25,7 @@ from threading import Thread
 
 import streamlit as st
 
-
+st.set_page_config(layout="wide")
 
 if 'chats' not in st.session_state:
     st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powerd chat", True)]
@@ -197,8 +197,8 @@ def render_chat_column(chat, col):
                         #if time_diff < MIN_TIME_BETWEEN_REQUESTS:
                         
                         #    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
-                        time.sleep(2)
-                        user_message = user_message.replace("'", "")
+                        #time.sleep(2)
+                    user_message = user_message.replace("'", "")
 
                     # Send prompt to LLM.
                     with st.spinner("Thinking..."):
