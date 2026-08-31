@@ -5,13 +5,17 @@ from ollama import Client, AsyncClient
 from pydantic import BaseModel
 class Query(BaseModel):
     question: str
+    history: list
+    rag: str
 
 app = fastapi.FastAPI()
 client = AsyncClient()
 
 @app.post("/chat/")
 async def chat(query: Query):
+  rag = query.rag == "True"
   message = {'role': 'user', 'content': query.question}
+  print("raggatone", rag)
   response = await client.chat(model='qwen3:1.7b', messages=[message])
   return {"response": response}
 

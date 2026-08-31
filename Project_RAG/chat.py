@@ -8,14 +8,22 @@ class Chat:
 
     def chat(self, message):
         print("Entering chat API call")
-        self.history.append({"role": "user", "content": message})
+        self.history.append(
+            {
+            "role": "user",
+            "content": message
+            })
         #self.history.append({"role": "assistant", "content": 2})
         #return "2"
         r = requests.post(
                 "http://127.0.0.1:8000/chat/",
-                json={"question": message},
-                timeout=300,     
+                json={
+                    "question": message,
+                    "history": self.history,
+                    "rag": str(self.rag) 
+                    },
             )
+        print("after post")
         
         r.raise_for_status()
         data = r.json()

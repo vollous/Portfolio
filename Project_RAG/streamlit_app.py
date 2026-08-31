@@ -28,7 +28,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 if 'chats' not in st.session_state:
-    st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powerd chat", True)]
+    st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powered chat", True)]
 
 st.set_page_config(page_title="Streamlit AI assistant", page_icon="✨")
 
