@@ -4,8 +4,7 @@ import signal
 from ollama import Client, AsyncClient
 from pydantic import BaseModel
 class Query(BaseModel):
-    question: str
-    history: list
+    messages: list = []
     rag: str
 
 app = fastapi.FastAPI()
@@ -14,9 +13,8 @@ client = AsyncClient()
 @app.post("/chat/")
 async def chat(query: Query):
   rag = query.rag == "True"
-  message = {'role': 'user', 'content': query.question}
-  print("raggatone", rag)
-  response = await client.chat(model='qwen3:1.7b', messages=[message])
+  print("Complete query:", query.messages)
+  response = await client.chat(model='qwen3:1.7b', messages=query.messages)
   return {"response": response}
 
 @app.post("/shutdown")

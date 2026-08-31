@@ -125,7 +125,7 @@ user_first_interaction = (
 )
 
 has_message_history = (
-    len(st.session_state["chats"][0].history) > 0 and len(st.session_state["chats"][1].history) > 0
+    len(st.session_state["chats"][0].messages) > 0 and len(st.session_state["chats"][1].messages) > 0
 )
 
 # Show a different UI when the user hasn't asked a question yet.
@@ -160,7 +160,7 @@ def render_chat_column(chat, col):
 
         # Display chat messages from history as speech bubbles.
         with message_container:
-            for i, message in enumerate(chat.history):
+            for i, message in enumerate(chat.messages):
                 with st.chat_message(message["role"]):
                     if message["role"] == "assistant":
                         st.container()  # Fix ghost message bug.
