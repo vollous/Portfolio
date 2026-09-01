@@ -21,3 +21,7 @@ Project_Anomaly_Detection/results/Patchcore/hazelnut/*
 */.ipynb_checkpoints/*
 Project_Anomaly_Detection/openvino_cache/*
 *.pyc
+Project_RAG/backend/chroma.db/*
+Project_RAG/data/processed_docs/_static_webpack-macros.json
+Project_RAG/data/raw/*
+*.ipynb_checkpoints
