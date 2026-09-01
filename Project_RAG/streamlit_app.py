@@ -57,17 +57,17 @@ INSTRUCTIONS = textwrap.dedent("""
 """)
 
 SUGGESTIONS = {
-    ":blue[:material/local_library:] What is 1+1?": (
-        "What is 1+1? Write the answer in english, french and german. Next, generate a random number between 0 and 10."
+    ":blue[:material/local_library:] Calculate covariant matrix": (
+        "Which function to use to calculate the covariance matrix? Which are its arguments?"
     ),
-    ":green[:material/database:] Random number": (
-        "Generate a random number between 0 and 10, be very direct."
+    ":green[:material/database:] ddof in np.cov function": (
+        "What does the ddof argument does in np.cov function?"
     ),
-    ":orange[:material/multiline_chart:] Supersimple question?": (
-        "What is 1+1? Be very direct."
+    ":orange[:material/multiline_chart:] Density argument in np.histogram": (
+        "What are the option for the density argument in np.histogram?"
     ),
-    ":violet[:material/apparel:] How do I customize my app?": (
-        "How do I customize my app? What does Streamlit offer? No hacks please."
+    ":violet[:material/apparel:] Calculate outer product.": (
+        "How to calculate the outer product of two arrays?"
     ),
     ":red[:material/deployed_code:] Deploying an app at work": (
         "How do I deploy an app at work? Give me easy and performant options."

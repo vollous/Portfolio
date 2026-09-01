@@ -7,7 +7,6 @@ class Chat:
         self.messages = []
 
     def chat(self, message):
-        print("Entering chat API call")
         self.messages.append(
             {
             "role": "user",
@@ -20,7 +19,6 @@ class Chat:
                     "rag": str(self.rag) 
                     },
             )
-        print("after post")
         
         r.raise_for_status()
         data = r.json()
