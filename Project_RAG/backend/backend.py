@@ -27,7 +27,7 @@ async def chat(query: Query):
      context = get_context(query.messages[0]["content"])
      context = "\n".join(context['documents'][0])
      query.messages.insert(0,
-                           {"role": "assistant", "content": f"""Answer this questions using only this context.
+                           {"role": "context", "content": f"""Answer this questions using only this context.
                            {context}
                            If the answer is not in this context say:' The answer is not in this context.' and do not answer any further."""})
  
@@ -41,7 +41,8 @@ async def chat(query: Query):
         "top_p": 0.8,
         "repeat_penalty": 1.05,
     },)            
-  return {"response": response}
+  query.messages.append({"role": "assistant", "content": response["message"]["content"]}) 
+  return {"messages": query.messages}
 
 @app.post("/shutdown")
 async def shutdown():

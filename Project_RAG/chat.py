@@ -22,9 +22,8 @@ class Chat:
         
         r.raise_for_status()
         data = r.json()
-        response = data["response"]["message"]["content"]
-        self.messages.append({"role": "assistant", "content": response})
-        print(response)
+        self.messages = data["messages"]
+        response = self.messages[-1]["content"]
         return(response)
 
     def clear_chat(self):

@@ -127,6 +127,8 @@ def render_chat_column(chat, col):
         # Display chat messages from history as speech bubbles.
         with message_container:
             for i, message in enumerate(chat.messages):
+                if message["role"] == "context":
+                    continue
                 with st.chat_message(message["role"]):
                     if message["role"] == "assistant":
                         st.container()  # Fix ghost message bug.
