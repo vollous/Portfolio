@@ -30,35 +30,13 @@ st.set_page_config(layout="wide")
 if 'chats' not in st.session_state:
     st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powered chat", True)]
 
-st.set_page_config(page_title="Streamlit AI assistant", page_icon="✨")
+st.set_page_config(page_title="Numpy AI assistant", page_icon="✨")
 
 MIN_TIME_BETWEEN_REQUESTS = datetime.timedelta(seconds=3)
 
-INSTRUCTIONS = textwrap.dedent("""
-    - You are a helpful AI chat assistant focused on answering quesions about
-      Streamlit, Streamlit Community Cloud, Snowflake, and general Python.
-    - You will be given extra information provided inside tags like this
-      <foo></foo>.
-    - Use context and history to provide a coherent answer.
-    - Use markdown such as headers (starting with ##), code blocks, bullet
-      points, indentation for sub bullets, and backticks for inline code.
-    - Don't start the response with a markdown header.
-    - Assume the user is a newbie.
-    - Be brief, but clear. If needed, you can write paragraphs of text, like
-      a documentation website.
-    - Avoid experimental and private APIs.
-    - Provide examples.
-    - Include related links throughout the text and at the bottom.
-    - Don't say things like "according to the provided context".
-    - Streamlit is a product of Snowflake.
-    - Offer alternatives within the Streamlit and Snowflake universe.
-    - For information about deploying in Snowflake, see
-      https://www.snowflake.com/en/product/features/streamlit-in-snowflake/
-""")
-
 SUGGESTIONS = {
     ":blue[:material/local_library:] Calculate covariant matrix": (
-        "Which function to use to calculate the covariance matrix? Which are its arguments?"
+        "Which function to use to calculate the covariance matrix using numpy? Which are its arguments?"
     ),
     ":green[:material/database:] ddof in np.cov function": (
         "What does the ddof argument does in np.cov function?"
@@ -67,7 +45,7 @@ SUGGESTIONS = {
         "What are the option for the density argument in np.histogram?"
     ),
     ":violet[:material/apparel:] Calculate outer product.": (
-        "How to calculate the outer product of two arrays?"
+        "How to calculate the outer product of two numpy arrays?"
     ),
     ":red[:material/deployed_code:] Deploying an app at work": (
         "How do I deploy an app at work? Give me easy and performant options."
@@ -107,7 +85,7 @@ title_row = st.container(
 with title_row:
     st.title(
         # ":material/cognition_2: Streamlit AI assistant", anchor=False, width="stretch"
-        "Lets compare a vanilla LLM with a RAG powered one... about stuff",
+        "Lets compare a vanilla LLM with a RAG powered one in the context of Numpy (python package)",
         anchor=False,
         width="stretch",
     )
