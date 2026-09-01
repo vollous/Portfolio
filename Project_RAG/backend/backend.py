@@ -36,7 +36,7 @@ async def chat(query: Query):
      messages=query.messages,
      think=False,
      options={
-        "num_ctx": 32768,              # <-- the important one
+        "num_ctx": 32768,         
         "temperature": 0.2,         
         "top_p": 0.8,
         "repeat_penalty": 1.05,
