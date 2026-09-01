@@ -150,7 +150,7 @@ def render_chat_column(chat, col):
 
                 # Display message as a speech bubble.
                 with st.chat_message("user"):
-                    st.text(user_message)
+                    st.markdown(user_message)
 
                 # Display assistant response as a speech bubble.
                 with st.chat_message("assistant"):
