@@ -30,45 +30,33 @@ st.set_page_config(layout="wide")
 if 'chats' not in st.session_state:
     st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powered chat", True)]
 
-st.set_page_config(page_title="Numpy AI assistant", page_icon="✨")
+st.set_page_config(page_title="Numpy AI assistant", page_icon="🤖")
 
 MIN_TIME_BETWEEN_REQUESTS = datetime.timedelta(seconds=3)
 
 SUGGESTIONS = {
-    ":blue[:material/local_library:] Calculate covariant matrix": (
+    ":blue[:material/local_library:] Which function to use to calculate the covariance matrix using numpy? Which are its arguments?": (
         "Which function to use to calculate the covariance matrix using numpy? Which are its arguments?"
     ),
-    ":green[:material/database:] ddof in np.cov function": (
+    ":green[:material/database:] What does the ddof argument does in np.cov function?": (
         "What does the ddof argument does in np.cov function?"
     ),
-    ":orange[:material/multiline_chart:] Density argument in np.histogram": (
+    ":orange[:material/multiline_chart:] What are the option for the density argument in np.histogram?": (
         "What are the option for the density argument in np.histogram?"
     ),
-    ":violet[:material/apparel:] Calculate outer product.": (
+    ":violet[:material/apparel:] How to calculate the outer product of two numpy arrays?": (
         "How to calculate the outer product of two numpy arrays?"
     ),
-    ":red[:material/deployed_code:] Deploying an app at work": (
-        "How do I deploy an app at work? Give me easy and performant options."
+    ":red[:material/deployed_code:] What does the `out` argument of `np.clip`do?": (
+        "What does the `out` argument of `np.clip`do?"
     ),
+    ":blue[:material/local_library:] How to fit a Chebyshev polynomial with numpy?": "How to fit a Chebyshev polynomial with numpy?"
 }
 
-@st.dialog("Legal disclaimer")
+@st.dialog("Info")
 def show_disclaimer_dialog():
     st.caption("""
-            This AI chatbot is powered by Snowflake and public Streamlit
-            information. Answers may be inaccurate, inefficient, or biased.
-            Any use or decisions based on such answers should include reasonable
-            practices including human oversight to ensure they are safe,
-            accurate, and suitable for your intended purpose. Streamlit is not
-            liable for any actions, losses, or damages resulting from the use
-            of the chatbot. Do not enter any private, sensitive, personal, or
-            regulated data. By using this chatbot, you acknowledge and agree
-            that input you provide and answers you receive (collectively,
-            “Content”) may be used by Snowflake to provide, maintain, develop,
-            and improve their respective offerings. For more
-            information on how Snowflake may use your Content, see
-            https://streamlit.io/terms-of-service.
-        """)
+            This AI chatbot is powered by a qwen3.5:0.8b small LLM coupled with a ChromaDB RAG backbone to provide usefull context to the LLM. The backend was developed using FastAPI which exposes a REST API framework that allows one to use a Streamlit webapp as frontend. We provide two option, a "vanilla" chat (not RAG powered) and a RAG powered version, so compare between the two methods. """)
 
 
 # -----------------------------------------------------------------------------
@@ -85,7 +73,7 @@ title_row = st.container(
 with title_row:
     st.title(
         # ":material/cognition_2: Streamlit AI assistant", anchor=False, width="stretch"
-        "Lets compare a vanilla LLM with a RAG powered one in the context of Numpy (python package)",
+        "A Numpy RAG powered AI assistant",
         anchor=False,
         width="stretch",
     )
@@ -171,11 +159,7 @@ def render_chat_column(chat, col):
                         question_timestamp = datetime.datetime.now()
                         time_diff = question_timestamp - st.session_state.prev_question_timestamp
                         st.session_state.prev_question_timestamp = question_timestamp
-
-                        #if time_diff < MIN_TIME_BETWEEN_REQUESTS:
                         
-                        #    time.sleep(time_diff.seconds + time_diff.microseconds * 0.001)
-                        #time.sleep(2)
                     user_message = user_message.replace("'", "")
 
                     # Send prompt to LLM.
