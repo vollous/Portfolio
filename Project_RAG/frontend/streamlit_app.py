@@ -60,8 +60,6 @@ def show_disclaimer_dialog():
 
 # -----------------------------------------------------------------------------
 # Draw the UI.
-
-
 st.html(div(style=styles(font_size=rem(5), line_height=1))["❉"])
 
 title_row = st.container(
@@ -113,7 +111,6 @@ if not user_first_interaction and not has_message_history:
     )
 
     st.stop()
-
 
 def render_chat_column(chat, col):
     with col:
@@ -172,25 +169,17 @@ def render_chat_column(chat, col):
                 # Display assistant response as a speech bubble.
                 with st.chat_message("assistant"):
                     with st.spinner("Waiting..."):
-                        # Rate-limit the input if needed.
                         question_timestamp = datetime.datetime.now()
                         time_diff = question_timestamp - st.session_state.prev_question_timestamp
                         st.session_state.prev_question_timestamp = question_timestamp
                         
                     user_message = user_message.replace("'", "")
 
-                    # Send prompt to LLM.
                     with st.spinner("Thinking..."):
                         response_gen = [chat.chat(user_message)]
 
-                    # Put everything after the spinners in a container to fix the
-                    # ghost message bug.
                     with st.empty():
-                        # Stream the LLM response.
                         st.write_stream(response_gen)
-
-
-
 
 cols = st.columns(2)
 
