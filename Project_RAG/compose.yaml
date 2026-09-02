@@ -1,0 +1,8 @@
+services:
+  frontend:
+    image: numpyragfrontend:latest
+    ports:
+      - "8080:8080"
+
+  backend:
+    image: numpyragbackend:latest

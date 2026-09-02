@@ -13,7 +13,7 @@ class Chat:
             "content": message
             })
         r = requests.post(
-            "http://host.docker.internal:8000/chat/",
+            "http://backend:8000/chat/",
                 json={
                     "messages": self.messages,
                     "rag": str(self.rag) 
