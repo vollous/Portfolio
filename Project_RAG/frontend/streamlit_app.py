@@ -117,7 +117,7 @@ if not user_first_interaction and not has_message_history:
 
 def render_chat_column(chat, col):
     with col:
-        colsinside = st.columns([3, 1])
+        colsinside = st.columns([2, 1])
         with colsinside[0]:
             st.header(chat.name)
         if (chat.rag):
@@ -127,7 +127,7 @@ def render_chat_column(chat, col):
                     st.text("\n".join(st.session_state.chats[1].messages[0]["content"].split("\n")[1:-1]))
 
 
-                st.text("")
+                st.text("\n\n")
                 st.button(
                     "Show context",
                     icon=":material/refresh:",
