@@ -32,8 +32,6 @@ if 'chats' not in st.session_state:
 
 st.set_page_config(page_title="Numpy AI assistant", page_icon="🤖")
 
-MIN_TIME_BETWEEN_REQUESTS = datetime.timedelta(seconds=3)
-
 SUGGESTIONS = {
     ":blue[:material/local_library:] Which function to use to calculate the covariance matrix using numpy? Which are its arguments?": (
         "Which function to use to calculate the covariance matrix using numpy? Which are its arguments?"
