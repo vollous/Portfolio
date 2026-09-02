@@ -12,8 +12,7 @@ class Query(BaseModel):
     rag: str
 
 app = fastapi.FastAPI()
-client = AsyncClient()
-
+client = AsyncClient(host=os.environ.get("OLLAMA_HOST", "http://host.docker.internal:11434"))
 def get_context(message, n_results=3):
   results = collection.query(query_texts=[message], n_results=n_results)
   return results

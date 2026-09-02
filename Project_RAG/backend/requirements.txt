@@ -1,0 +1,4 @@
+chromadb
+pydantic
+ollama
+fastapi[standard]
