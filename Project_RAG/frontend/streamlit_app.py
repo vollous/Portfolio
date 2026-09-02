@@ -117,7 +117,23 @@ if not user_first_interaction and not has_message_history:
 
 def render_chat_column(chat, col):
     with col:
-        st.header(chat.name)
+        colsinside = st.columns([3, 1])
+        with colsinside[0]:
+            st.header(chat.name)
+        if (chat.rag):
+            with colsinside[1]: 
+                @st.dialog("Show context", width="large")
+                def show_context():
+                    st.text("\n".join(st.session_state.chats[1].messages[0]["content"].split("\n")[1:-1]))
+
+
+                st.text("")
+                st.button(
+                    "Show context",
+                    icon=":material/refresh:",
+                    on_click=show_context,
+                )
+
         if "prev_question_timestamp" not in st.session_state:
             st.session_state.prev_question_timestamp = datetime.datetime.fromtimestamp(0)
 
