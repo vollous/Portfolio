@@ -50,7 +50,8 @@ SUGGESTIONS = {
     ":red[:material/deployed_code:] What does the `out` argument of `np.clip`do?": (
         "What does the `out` argument of `np.clip`do?"
     ),
-    ":blue[:material/local_library:] How to fit a Chebyshev polynomial with numpy?": "How to fit a Chebyshev polynomial with numpy?"
+    ":blue[:material/local_library:] How to fit a Chebyshev polynomial with numpy?": ("How to fit a Chebyshev polynomial with numpy?"),
+    ":red[:material/multiline_chart:] How big is a football field?": ("How big is a football field?")
 }
 
 @st.dialog("Info")
@@ -127,7 +128,7 @@ def render_chat_column(chat, col):
         # Display chat messages from history as speech bubbles.
         with message_container:
             for i, message in enumerate(chat.messages):
-                if message["role"] == "context":
+                if message["role"] == "system":
                     continue
                 with st.chat_message(message["role"]):
                     if message["role"] == "assistant":
