@@ -28,7 +28,8 @@ async def chat(query: Query):
      query.messages.insert(0,
                            {"role": "system", "content": f"""Answer this questions using only this context.
                            {context}
-                           If the answer is not in this context say:' The answer is not in this context.' and do not answer any further."""})
+                           If the answer is not in this context say:' The answer is not in this context.' and do not answer any further.
+                           Only use examples from the context"""})
  
   response = await client.chat(
      model='ibm/granite4:350m',
