@@ -1,4 +1,7 @@
 services:
+  ollama:
+    image: granite4_350m:latest
+
   frontend:
     image: numpyragfrontend:latest
     ports:
