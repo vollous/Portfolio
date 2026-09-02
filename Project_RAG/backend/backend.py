@@ -31,7 +31,7 @@ async def chat(query: Query):
                            If the answer is not in this context say:' The answer is not in this context.' and do not answer any further."""})
  
   response = await client.chat(
-     model='qwen3.5:0.8b',
+     model='ibm/granite4:350m',
      messages=query.messages,
      think=False,
      options={
