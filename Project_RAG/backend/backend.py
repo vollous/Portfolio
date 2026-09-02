@@ -13,7 +13,7 @@ class Query(BaseModel):
 
 app = fastapi.FastAPI()
 client = AsyncClient(host=os.environ.get("OLLAMA_HOST", "http://host.docker.internal:11434"))
-def get_context(message, n_results=3):
+def get_context(message, n_results=10):
   results = collection.query(query_texts=[message], n_results=n_results)
   return results
 
@@ -24,7 +24,7 @@ async def chat(query: Query):
   context = []
   if rag and len(query.messages) == 1:
      context = get_context(query.messages[0]["content"])
-     context = "\n".join(context['documents'][0])
+     context = "\n\n<->\n\n".join(context['documents'][0])
      query.messages.insert(0,
                            {"role": "system", "content": f"""Answer this questions using only this context.
                            {context}
