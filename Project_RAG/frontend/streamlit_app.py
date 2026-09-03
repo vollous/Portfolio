@@ -28,7 +28,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 if 'chats' not in st.session_state:
-    st.session_state['chats'] = [Chat("Vanilla chat", False), Chat("RAG powered chat", True)]
+    st.session_state['chats'] = [Chat("Normal chat", False), Chat("RAG powered chat", True)]
 
 st.set_page_config(page_title="Numpy AI assistant", page_icon="🤖")
 
@@ -36,17 +36,17 @@ SUGGESTIONS = {
     ":blue[:material/local_library:] Which function to use to calculate the covariance matrix using numpy? Which are its arguments?": (
         "Which function to use to calculate the covariance matrix using numpy? Which are its arguments?"
     ),
-    ":green[:material/database:] What does the ddof argument does in np.cov function?": (
-        "What does the ddof argument does in np.cov function?"
+    ":green[:material/database:] What does the `ddof` argument do in `np.cov` function?": (
+        "What does the `ddof` argument do in `np.cov` function?"
     ),
-    ":orange[:material/multiline_chart:] What are the option for the density argument in np.histogram?": (
-        "What are the option for the density argument in np.histogram?"
+    ":orange[:material/multiline_chart:] What are the option for the density argument in `np.histogram`?": (
+        "What are the option for the density argument i `np.histogram`?"
     ),
     ":violet[:material/apparel:] How to calculate the outer product of two numpy arrays?": (
         "How to calculate the outer product of two numpy arrays?"
     ),
-    ":red[:material/deployed_code:] What does the `out` argument of `np.clip`do?": (
-        "What does the `out` argument of `np.clip`do?"
+    ":red[:material/deployed_code:] What does the `out` argument of `np.clip` do?": (
+        "What does the `out` argument of `np.clip` do?"
     ),
     ":blue[:material/local_library:] How to fit a Chebyshev polynomial with numpy?": ("How to fit a Chebyshev polynomial with numpy?"),
     ":red[:material/multiline_chart:] How big is a football field?": ("How big is a football field?")
@@ -55,7 +55,7 @@ SUGGESTIONS = {
 @st.dialog("Info")
 def show_disclaimer_dialog():
     st.caption("""
-            This AI chatbot is powered by a qwen3.5:0.8b small LLM coupled with a ChromaDB RAG backbone to provide usefull context to the LLM. The backend was developed using FastAPI which exposes a REST API framework that allows one to use a Streamlit webapp as frontend. We provide two option, a "vanilla" chat (not RAG powered) and a RAG powered version, so compare between the two methods. """)
+            This AI chatbot is powered by a qwen3.5:0.8b small LLM coupled with a ChromaDB RAG backbone to provide usefull context to the LLM. The backend was developed using FastAPI which exposes a REST API framework that allows one to use a Streamlit webapp as frontend. We provide two option, a "normal" chat (not RAG powered) and a RAG powered version, so compare between the two methods. """)
 
 
 # -----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ if not user_first_interaction and not has_message_history:
         )
 
     st.button(
-        "&nbsp;:small[:gray[:material/balance: Legal disclaimer]]",
+        "&nbsp;:small[:gray[:material/balance: Disclaimer]]",
         type="tertiary",
         on_click=show_disclaimer_dialog,
     )
