@@ -1,7 +1,7 @@
 # Portfolio — data science & machine learning projects
 
 Source code and notebooks for the project write-ups on
-[vollous.github.io](https://vollous.github.io/notes) by João "Chico" Viana.
+[vollous.github.io](https://vollous.github.io/) by João "Chico" Viana.
 
 Each project is self-contained in its own directory. The narrated version of
 every project — methods, plots and results — lives on the site; this repo is the
@@ -34,8 +34,6 @@ Notebook: `ai-impact-on-students.ipynb`. Data:
 - **Classification** of `Burnout_Risk_Level` — KNN, Random Forest, GBT, SVC and
   a small NN, with decision-threshold tuning on the `High` class to reach ≥ 0.9
   recall so at-risk students are not missed.
-
-The `*_reports.npy` files cache the cross-validation results the notebook plots.
 
 ### Anomaly detection on the MVTec AD database — `Project_Anomaly_Detection/`
 
