@@ -12,8 +12,8 @@ class Query(BaseModel):
     rag: str
 
 app = fastapi.FastAPI()
-#client = AsyncClient("http://host.docker.internal:11434")
-client = AsyncClient(host="http://ollama:11434")
+client = AsyncClient("http://host.docker.internal:11434")
+#client = AsyncClient(host="http://ollama:11434")
 def get_context(message, n_results=10):
   results = collection.query(query_texts=[message], n_results=n_results)
   return results
@@ -44,8 +44,3 @@ async def chat(query: Query):
     },)            
   query.messages.append({"role": "assistant", "content": response["message"]["content"]}) 
   return {"messages": query.messages}
-
-@app.post("/shutdown")
-async def shutdown():
-    os.kill(os.getpid(), signal.SIGTERM)
-    return fastapi.Response(status_code=200, content='Server shutting down...')
